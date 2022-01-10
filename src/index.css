@@ -1,0 +1,11 @@
+.wrapper {
+	max-width: 750px;
+	margin: 0 auto;
+	border: 1px solid #000;
+	border-radius: 15px;
+	padding: 15px;
+}
+
+.wrapper > .css-1fyyp8j-MuiGrid-root {
+	max-width: 100%;
+}
