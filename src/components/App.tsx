@@ -1,35 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import moment from 'moment';
+import 'antd/dist/antd.css';
 
-import { styled } from '@mui/material/styles';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import FolderIcon from '@mui/icons-material/Folder';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Button, Avatar } from '@mui/material';
+import { Typography } from 'antd';
 
-function generate(element: React.ReactElement) {
-	return [0, 1, 2].map((value) =>
-		React.cloneElement(element, {
-			key: value,
-		})
-	);
-}
+import { useSortableData } from '../hooks/useSortableData';
+import { IList } from '../interfaces/IList';
+import { NewMeetButton } from './NewMeetButton';
+import { INewList } from '../interfaces/INewList';
+import { SortAscendingOutlined } from '@ant-design/icons';
 
-const Demo = styled('div')(({ theme }) => ({
-	backgroundColor: theme.palette.background.paper,
-}));
+const tableHead = [
+	{ id: 'clinicianName', value: 'Clinician Name' },
+	{ id: 'startDate', value: 'Start Date' },
+	{ id: 'endDate', value: 'End Date' },
+	{ id: 'patient', value: 'Patient Name' },
+	{ id: 'status', value: 'Status' },
+];
+
+const { Title } = Typography;
 
 export const App = () => {
-	const [list, setList] = useState([]);
+	const [list, setList] = useState<IList[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const [dense, setDense] = React.useState(false);
-	const [secondary, setSecondary] = React.useState(false);
+	const [visible, setVisible] = useState(false);
+
+	const onCreateNewMeet = (values: INewList) => {
+		const dateValue = values?.date.filter((item: { _d: string }) => item._d);
+		const newMeet = {
+			id: Math.random().toString(36).substring(12),
+			clinicianName: values?.clinicianName,
+			startDate: dateValue[0],
+			endDate: dateValue[1],
+			status: values?.status.toUpperCase(),
+			patient: {
+				id: Math.random().toString(35).substring(15),
+				name: values?.patientName,
+			},
+		};
+		setList((prev) => [...prev, newMeet]);
+		setVisible(false);
+	};
 
 	useEffect(() => {
 		setIsLoading(true);
@@ -41,35 +56,83 @@ export const App = () => {
 			})
 			.catch((error) => console.log(error));
 	}, []);
-	console.log(list);
+
+	const onItemRemove = (id: string) => {
+		setList((prevlist) => [...prevlist.filter((item) => item.id !== id)]);
+	};
+
+	const { items, requestSort } = useSortableData(list);
+
+	const getOnSortClick = (id: string) => () => {
+		requestSort(id);
+	};
+
+	const handleRemoveItem = (id: string) => () => {
+		onItemRemove(id);
+	};
+
+	const mappedTableHead = useMemo(
+		() =>
+			tableHead.map((item) => (
+				<th key={item.id}>
+					<button type="button">
+						{item.value}
+						<SortAscendingOutlined onClick={getOnSortClick(item.id)} />
+					</button>
+				</th>
+			)),
+		[tableHead]
+	);
+
+	const mappedItems = useMemo(
+		() =>
+			items?.map((x) => (
+				<tr key={x.id}>
+					<td className="name">
+						<Avatar>
+							<AssignmentIcon />
+						</Avatar>
+						{x.clinicianName}
+					</td>
+					<td>{moment(x.startDate).format('MMMM Do YYYY, h:mm:ss a')}</td>
+					<td>{moment(x.endDate).format('MMMM Do YYYY, h:mm:ss a')}</td>
+					<td>{x.patient.name}</td>
+					<td className={x.status === 'CANCELLED' ? 'cancelledTd' : null}>
+						{x.status}
+					</td>
+					<td>
+						<Button
+							onClick={handleRemoveItem(x.id)}
+							variant="outlined"
+							startIcon={<DeleteIcon />}
+						>
+							Delete
+						</Button>
+					</td>
+				</tr>
+			)),
+		[items]
+	);
 
 	return (
 		<div className="wrapper">
-			<Grid item xs={12} md={6}>
-				<Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
-					List of appointments
-				</Typography>
-				<Demo>
-					<List dense={dense}>
-						{generate(
-							<ListItem
-								secondaryAction={
-									<IconButton edge="end" aria-label="delete">
-										<DeleteIcon />
-									</IconButton>
-								}
-							>
-								<ListItemAvatar>
-									<Avatar>
-										<FolderIcon />
-									</Avatar>
-								</ListItemAvatar>
-								<ListItemText primary="Single-line item" />
-							</ListItem>
-						)}
-					</List>
-				</Demo>
-			</Grid>
+			<div className="header">
+				<Title type="secondary">LIST MEETINGS</Title>
+				<NewMeetButton
+					onCreate={onCreateNewMeet}
+					visible={visible}
+					setVisible={setVisible}
+				/>
+			</div>
+			<table>
+				<thead>
+					<tr>
+						{mappedTableHead}
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>{isLoading ? <Title>Loading...</Title> : mappedItems}</tbody>
+			</table>
 		</div>
 	);
 };
