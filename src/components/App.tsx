@@ -13,6 +13,7 @@ import { IList } from '../interfaces/IList';
 import { NewMeetButton } from './NewMeetButton';
 import { INewList } from '../interfaces/INewList';
 import { SortAscendingOutlined } from '@ant-design/icons';
+import { ContentCutOutlined } from '@mui/icons-material';
 
 const tableHead = [
 	{ id: 'clinicianName', value: 'Clinician Name' },
@@ -28,6 +29,18 @@ export const App = () => {
 	const [list, setList] = useState<IList[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [visible, setVisible] = useState(false);
+
+	const { items, requestSort } = useSortableData(list);
+
+	// const log = () =>
+	// 	items.map((v) => {
+	// 		const date1 = new Date(v.endDate).getHours();
+	// 		const date2 = new Date(v.startDate).getHours();
+	// 		const timeDiff = date1 - date2;
+	// 		return timeDiff;
+	// 	});
+
+	// console.log(log());
 
 	const onCreateNewMeet = (values: INewList) => {
 		const dateValue = values?.date.filter((item: { _d: string }) => item._d);
@@ -61,8 +74,6 @@ export const App = () => {
 		setList((prevlist) => [...prevlist.filter((item) => item.id !== id)]);
 	};
 
-	const { items, requestSort } = useSortableData(list);
-
 	const getOnSortClick = (id: string) => () => {
 		requestSort(id);
 	};
@@ -86,31 +97,45 @@ export const App = () => {
 
 	const mappedItems = useMemo(
 		() =>
-			items?.map((x) => (
-				<tr key={x.id}>
-					<td className="name">
-						<Avatar>
-							<AssignmentIcon />
-						</Avatar>
-						{x.clinicianName}
-					</td>
-					<td>{moment(x.startDate).format('MMMM Do YYYY, h:mm:ss a')}</td>
-					<td>{moment(x.endDate).format('MMMM Do YYYY, h:mm:ss a')}</td>
-					<td>{x.patient.name}</td>
-					<td className={x.status === 'CANCELLED' ? 'cancelledTd' : null}>
-						{x.status}
-					</td>
-					<td>
-						<Button
-							onClick={handleRemoveItem(x.id)}
-							variant="outlined"
-							startIcon={<DeleteIcon />}
-						>
-							Delete
-						</Button>
-					</td>
-				</tr>
-			)),
+			items?.map((x) => {
+				const date1 = moment(new Date(x.endDate));
+				const date2 = moment(new Date(x.startDate));
+				const timeDiff = date1.diff(date2, 'minutes');
+				console.log(timeDiff);
+
+				return (
+					<tr
+					// data-tooltip={
+					// 	timeDiff > 1
+					//    ? `Meeting lasts ${timeDiff} hours` : null
+					// }
+					// key={x.id}
+					// className={timeDiff > 1 ? 'timeDiff' : ''}
+					>
+						<td className="name">
+							<Avatar>
+								<AssignmentIcon />
+							</Avatar>
+							{x.clinicianName}
+						</td>
+						<td>{moment(x.startDate).format('MMMM Do YYYY, h:mm:ss a')}</td>
+						<td>{moment(x.endDate).format('MMMM Do YYYY, h:mm:ss a')}</td>
+						<td>{x.patient.name}</td>
+						<td className={x.status === 'CANCELLED' ? 'cancelledTd' : null}>
+							{x.status}
+						</td>
+						<td>
+							<Button
+								onClick={handleRemoveItem(x.id)}
+								variant="outlined"
+								startIcon={<DeleteIcon />}
+							>
+								Delete
+							</Button>
+						</td>
+					</tr>
+				);
+			}),
 		[items]
 	);
 

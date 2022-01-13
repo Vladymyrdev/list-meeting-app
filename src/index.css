@@ -104,3 +104,30 @@ tbody tr:hover {
 .collection-create-form_last-form-item {
 	margin-bottom: 0;
 }
+
+.timeDiff {
+	font-weight: bolder;
+	background-color: rgb(248, 233, 233);
+}
+
+[data-tooltip] {
+	position: relative;
+}
+[data-tooltip]::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	width: 300px;
+	left: 0;
+	top: 0;
+	background: #3989c9;
+	color: #fff;
+	padding: 0.5em;
+	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+	pointer-events: none;
+	opacity: 0;
+	transition: 1s;
+}
+[data-tooltip]:hover::after {
+	opacity: 1;
+	top: 2em;
+}
