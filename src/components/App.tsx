@@ -12,6 +12,7 @@ import { useSortableData } from '../hooks/useSortableData';
 import { IList } from '../interfaces/IList';
 import { NewMeetButton } from './NewMeetButton';
 import { INewList } from '../interfaces/INewList';
+import { getTimeFromMins } from '../utils/getTimeFromMins';
 
 const tableHead = [
 	{ id: 'clinicianName', value: 'Clinician Name' },
@@ -70,12 +71,6 @@ export const App = () => {
 		if (confirm('Are you sure you want to delete the meeting?')) {
 			onItemRemove(id);
 		}
-	};
-
-	const getTimeFromMins = (mins: number) => {
-		let hours = Math.trunc(mins / 60);
-		let minutes = mins % 60;
-		return hours + 'h. ' + minutes + 'min.';
 	};
 
 	const mappedTableHead = useMemo(
