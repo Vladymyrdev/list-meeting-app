@@ -1,19 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import moment from 'moment';
-import 'antd/dist/antd.css';
 
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button, Avatar } from '@mui/material';
+import { SortAscendingOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
 import { useSortableData } from '../hooks/useSortableData';
 import { IList } from '../interfaces/IList';
 import { NewMeetButton } from './NewMeetButton';
 import { INewList } from '../interfaces/INewList';
-import { SortAscendingOutlined } from '@ant-design/icons';
-import { ContentCutOutlined } from '@mui/icons-material';
 
 const tableHead = [
 	{ id: 'clinicianName', value: 'Clinician Name' },
@@ -31,16 +29,6 @@ export const App = () => {
 	const [visible, setVisible] = useState(false);
 
 	const { items, requestSort } = useSortableData(list);
-
-	// const log = () =>
-	// 	items.map((v) => {
-	// 		const date1 = new Date(v.endDate).getHours();
-	// 		const date2 = new Date(v.startDate).getHours();
-	// 		const timeDiff = date1 - date2;
-	// 		return timeDiff;
-	// 	});
-
-	// console.log(log());
 
 	const onCreateNewMeet = (values: INewList) => {
 		const dateValue = values?.date.filter((item: { _d: string }) => item._d);
@@ -79,7 +67,15 @@ export const App = () => {
 	};
 
 	const handleRemoveItem = (id: string) => () => {
-		onItemRemove(id);
+		if (confirm('Are you sure you want to delete the meeting?')) {
+			onItemRemove(id);
+		}
+	};
+
+	const getTimeFromMins = (mins: number) => {
+		let hours = Math.trunc(mins / 60);
+		let minutes = mins % 60;
+		return hours + 'h. ' + minutes + 'min.';
 	};
 
 	const mappedTableHead = useMemo(
@@ -101,30 +97,51 @@ export const App = () => {
 				const date1 = moment(new Date(x.endDate));
 				const date2 = moment(new Date(x.startDate));
 				const timeDiff = date1.diff(date2, 'minutes');
-				console.log(timeDiff);
-
 				return (
 					<tr
-					// data-tooltip={
-					// 	timeDiff > 1
-					//    ? `Meeting lasts ${timeDiff} hours` : null
-					// }
-					// key={x.id}
-					// className={timeDiff > 1 ? 'timeDiff' : ''}
+						data-tooltip={
+							timeDiff > 60
+								? `Meeting lasts ${getTimeFromMins(timeDiff)}`
+								: null
+						}
+						key={x.id}
+						className={timeDiff > 60 ? 'timeDiff' : null}
 					>
-						<td className="name">
-							<Avatar>
-								<AssignmentIcon />
-							</Avatar>
-							{x.clinicianName}
+						<td className="name meet-item">
+							<strong>Clinician Name:</strong>
+							<span>
+								<Avatar>
+									<AssignmentIcon />
+								</Avatar>
+								{x.clinicianName}
+							</span>
 						</td>
-						<td>{moment(x.startDate).format('MMMM Do YYYY, h:mm:ss a')}</td>
-						<td>{moment(x.endDate).format('MMMM Do YYYY, h:mm:ss a')}</td>
-						<td>{x.patient.name}</td>
-						<td className={x.status === 'CANCELLED' ? 'cancelledTd' : null}>
-							{x.status}
+						<td className="meet-item">
+							<strong>Start Date:</strong>
+							<span>
+								{moment(x.startDate).format('MMMM Do YYYY, h:mm:ss a')}
+							</span>
 						</td>
-						<td>
+						<td className="meet-item">
+							<strong>End Date:</strong>
+							<span>{moment(x.endDate).format('MMMM Do YYYY, h:mm:ss a')}</span>
+						</td>
+						<td className="time-diff-row">
+							<strong>Time Diff:</strong>
+							<span>{getTimeFromMins(timeDiff)}</span>
+						</td>
+						<td className="meet-item">
+							<strong>Patient Name:</strong>
+							<span>{x.patient.name}</span>
+						</td>
+						<td
+							className={x.status === 'CANCELLED' ? 'cancelledTd' : 'meet-item'}
+						>
+							<strong>Status:</strong>
+							<span>{x.status}</span>
+						</td>
+
+						<td className="button-row">
 							<Button
 								onClick={handleRemoveItem(x.id)}
 								variant="outlined"

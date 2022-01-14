@@ -1,0 +1,79 @@
+@media (max-width: 768px) {
+	.wrapper {
+		background-color: #fff;
+		max-width: none;
+	}
+
+	.header {
+		flex-direction: column;
+		align-items: center;
+		margin-bottom: 20px;
+	}
+
+	.header > div {
+		width: 100%;
+	}
+
+	.header > div > button {
+		width: inherit;
+	}
+
+	table {
+		width: 100%;
+	}
+
+	td > strong {
+		display: block;
+	}
+
+	.button-row {
+		width: 100%;
+	}
+
+	.button-row > button {
+		width: inherit;
+	}
+
+	thead {
+		display: none;
+	}
+
+	tbody {
+		display: flex;
+		flex-direction: column;
+	}
+
+	tbody tr {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.meet-item {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.meet-item > span {
+		display: flex;
+		align-items: center;
+	}
+
+	.meet-item > span > div {
+		display: none;
+	}
+
+	.cancelledTd {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.time-diff-row {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+	}
+}
